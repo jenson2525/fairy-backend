@@ -34,3 +34,13 @@ spring:
         enabled: true
         type: async
         request-timeout: 60s
+
+tools:
+  qweather:
+    key-id:  C4WMKKCUWQ # KeyID
+    project-id: 4BKUH9CRAM # ProjectID
+    private-key: |
+      -----BEGIN PRIVATE KEY-----
+      MC4CAQAwBQYDK2VwBCIEICtDvzhVOxGXinr/FGq/t4HzMWaIQ2kXPlXMNHlNdr/Q
+      -----END PRIVATE KEY-----
+    api-host: https://kb4up5k283.re.qweatherapi.com

@@ -1,5 +1,6 @@
-package cn.nuaa.jensonxu.fairy.integration.service.tools.service;
+package cn.nuaa.jensonxu.fairy.integration.service.tools.service.impl;
 
+import cn.nuaa.jensonxu.fairy.integration.service.tools.service.McpToolService;
 import cn.nuaa.jensonxu.fairy.integration.service.tools.utils.ZoneUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.tool.annotation.Tool;

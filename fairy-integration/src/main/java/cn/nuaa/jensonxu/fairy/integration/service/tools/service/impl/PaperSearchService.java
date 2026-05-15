@@ -1,5 +1,6 @@
-package cn.nuaa.jensonxu.fairy.integration.service.tools.service;
+package cn.nuaa.jensonxu.fairy.integration.service.tools.service.impl;
 
+import cn.nuaa.jensonxu.fairy.integration.service.tools.service.SkillToolService;
 import cn.nuaa.jensonxu.fairy.integration.service.tools.utils.ArxivUtils;
 
 import com.rometools.rome.feed.synd.SyndEntry;
