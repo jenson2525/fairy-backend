@@ -1,5 +1,6 @@
 package cn.nuaa.jensonxu.fairy.service.agent;
 
+import cn.nuaa.jensonxu.fairy.common.data.llm.ChatFileDTO;
 import cn.nuaa.jensonxu.fairy.common.data.llm.agent.request.AgentChatDTO;
 import cn.nuaa.jensonxu.fairy.common.repository.mysql.AgentSessionMetadataRepository;
 import cn.nuaa.jensonxu.fairy.common.repository.mysql.data.AgentSessionMetadataDO;
@@ -16,6 +17,7 @@ import com.alibaba.cloud.ai.graph.agent.ReactAgent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
@@ -45,6 +47,7 @@ public class AgentService {
         log.info("[agent] 开始 Agent 对话 - userId: {}, agentSessionId: {}, model: {}, maxIterations: {}", agentChatDTO.getUserId(), agentSessionId, agentChatDTO.getModelName(), maxIterations);
         handleSessionMetadata(agentChatDTO, agentSessionId);  // 维护会话元数据，创建标题
         AgentLoadedContext context = agentMemoryManager.loadContext(agentSessionId, agentChatDTO.getUserId());  // ① 加载记忆上下文：短期消息历史 + 长期记忆 System Prompt 前缀
+        agentChatDTO.setMessage(buildMessage(agentChatDTO));
         ReactAgent reactAgent = agentClientBuilder.build(agentChatDTO.getModelName(), agentSessionId, agentChatDTO.getUserId(), context);  // ② 构建 ReactAgent：注入 MemorySaver、回填历史、设置 System Prompt
         SseEmitter sseEmitter = new SseEmitter(0L);  // ③ 创建 SSE 连接（0L 表示不超时，由 Agent 执行完毕后主动关闭）
         setSseCallbacks(sseEmitter, agentSessionId);
@@ -107,5 +110,23 @@ public class AgentService {
 
         emitter.onError(e ->
                 log.error("[agent] SSE 连接错误 - agentSessionId: {}, 错误: {}", agentSessionId, e.getMessage()));
+    }
+
+    /**
+     * 构建最终传入 Agent 的用户消息
+     * 若请求携带附件，将文件元数据追加到消息末尾，引导 Agent 调用 readUploadedFile 工具
+     */
+    private String buildMessage(AgentChatDTO agentChatDTO) {
+        if (CollectionUtils.isEmpty(agentChatDTO.getFiles())) {
+            return agentChatDTO.getMessage();
+        }
+        StringBuilder sb = new StringBuilder(agentChatDTO.getMessage());
+        sb.append("\n\n[附件信息]");
+        for (ChatFileDTO file : agentChatDTO.getFiles()) {
+            sb.append("\n- 文件名: ").append(file.getFileName())
+                    .append(", 路径: ").append(file.getFileId());
+        }
+        sb.append("\n请使用 readUploadedFile 工具读取上述文件内容后再回答。");
+        return sb.toString();
     }
 }

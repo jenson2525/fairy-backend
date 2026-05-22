@@ -89,7 +89,7 @@ public class McpClientManager {
     }
 
     /**
-     * 获取当前所有活跃的第三方 MCP 工具回调（缓存值，O(1)）
+     * 获取当前所有活跃的第三方 MCP 工具
      */
     public ToolCallback[] getActiveToolCallbacks() {
         return cachedToolCallbacks;

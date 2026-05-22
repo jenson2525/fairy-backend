@@ -1,8 +1,12 @@
 package cn.nuaa.jensonxu.fairy.common.data.llm.agent.request;
 
+import cn.nuaa.jensonxu.fairy.common.data.llm.ChatFileDTO;
+
 import lombok.Data;
+
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -13,6 +17,9 @@ public class AgentChatDTO {
 
     /** 用户输入的问题 */
     private String message;
+
+    /** 本次对话携带的附件列表，为空时表示纯文本对话 */
+    private List<ChatFileDTO> files;
 
     /**
      * Agent 会话 ID
@@ -35,9 +42,7 @@ public class AgentChatDTO {
 
     public String getSessionId() {
         if (StringUtils.isBlank(sessionId)) {
-            String prefix = StringUtils.isNotBlank(userId)
-                    ? userId.substring(0, Math.min(userId.length(), 6))
-                    : "anon";
+            String prefix = StringUtils.isNotBlank(userId) ? userId.substring(0, Math.min(userId.length(), 6)) : "anon";
             this.sessionId = "agent_" + prefix + "_" + UUID.randomUUID().toString().substring(0, 8);
         }
         return sessionId;
