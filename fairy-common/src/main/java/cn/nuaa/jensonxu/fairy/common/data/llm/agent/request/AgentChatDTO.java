@@ -2,6 +2,9 @@ package cn.nuaa.jensonxu.fairy.common.data.llm.agent.request;
 
 import cn.nuaa.jensonxu.fairy.common.data.llm.ChatFileDTO;
 
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+
 import lombok.Data;
 
 import org.apache.commons.lang3.StringUtils;
@@ -13,9 +16,11 @@ import java.util.UUID;
 public class AgentChatDTO {
 
     /** 用户 ID */
+    @NotBlank(message = "用户ID不能为空")
     private String userId;
 
     /** 用户输入的问题 */
+    @NotBlank(message = "消息内容不能为空")
     private String message;
 
     /** 本次对话携带的附件列表，为空时表示纯文本对话 */
@@ -38,6 +43,7 @@ public class AgentChatDTO {
      * 最大 ReAct 循环迭代次数
      * 为 null 或 0 时使用全局配置 AgentProperties.maxIterations
      */
+    @Min(value = 1, message = "最大迭代次数必须大于0")
     private Integer maxIterations;
 
     public String getSessionId() {

@@ -2,6 +2,8 @@ package cn.nuaa.jensonxu.fairy.service.agent;
 
 import cn.nuaa.jensonxu.fairy.common.data.llm.agent.request.AgentModelConfigFormDTO;
 import cn.nuaa.jensonxu.fairy.common.data.llm.agent.response.AgentModelConfigVO;
+import cn.nuaa.jensonxu.fairy.common.exception.BusinessException;
+import cn.nuaa.jensonxu.fairy.common.exception.ErrorCode;
 import cn.nuaa.jensonxu.fairy.common.repository.mysql.data.AgentModelConfigDO;
 import cn.nuaa.jensonxu.fairy.integration.agent.model.manager.CustomModelManager;
 
@@ -24,7 +26,7 @@ public class AgentModelConfigService {
 
     public void addConfig(AgentModelConfigFormDTO dto) {
         if (customModelManager.existsByUserIdAndModelName(dto.getUserId(), dto.getModelName())) {
-            throw new IllegalArgumentException("模型名称已存在: " + dto.getModelName());
+            throw new BusinessException(ErrorCode.PARAM_ERROR, "模型名称已存在: " + dto.getModelName());
         }
 
         AgentModelConfigDO record = AgentModelConfigDO.builder()
@@ -45,9 +47,9 @@ public class AgentModelConfigService {
     }
 
     public void updateConfig(Long id, AgentModelConfigFormDTO dto) {
-        AgentModelConfigDO existing = customModelManager.findById(id).orElseThrow(() -> new IllegalArgumentException("配置不存在，id: " + id));
+        AgentModelConfigDO existing = customModelManager.findById(id).orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND, "配置不存在，id: " + id));
         if (!existing.getModelName().equals(dto.getModelName()) && customModelManager.existsByUserIdAndModelName(dto.getUserId(), dto.getModelName())) {
-            throw new IllegalArgumentException("模型名称已存在: " + dto.getModelName());
+            throw new BusinessException(ErrorCode.PARAM_ERROR, "模型名称已存在: " + dto.getModelName());
         }
 
         existing.setModelName(dto.getModelName());
@@ -63,7 +65,7 @@ public class AgentModelConfigService {
     }
 
     public void deleteConfig(Long id) {
-        customModelManager.findById(id).orElseThrow(() -> new IllegalArgumentException("配置不存在，id: " + id));
+        customModelManager.findById(id).orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND, "配置不存在，id: " + id));
         customModelManager.deleteById(id);
         log.info("[agent] 删除配置, id: {}", id);
     }

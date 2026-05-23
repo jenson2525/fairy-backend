@@ -1,24 +1,25 @@
 package cn.nuaa.jensonxu.fairy.web.controller;
 
-import cn.nuaa.jensonxu.fairy.common.data.llm.agent.response.AgentSessionVO;
-import cn.nuaa.jensonxu.fairy.common.data.llm.agent.response.AgentSessionMessageVO;
 import cn.nuaa.jensonxu.fairy.common.data.file.response.CustomResponse;
-import cn.nuaa.jensonxu.fairy.service.agent.AgentSessionQueryService;
 import cn.nuaa.jensonxu.fairy.common.data.llm.agent.request.AgentChatDTO;
+import cn.nuaa.jensonxu.fairy.common.data.llm.agent.response.AgentSessionMessageVO;
+import cn.nuaa.jensonxu.fairy.common.data.llm.agent.response.AgentSessionVO;
 import cn.nuaa.jensonxu.fairy.service.agent.AgentService;
+import cn.nuaa.jensonxu.fairy.service.agent.AgentSessionQueryService;
 
-import org.apache.commons.lang3.StringUtils;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.http.MediaType;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.List;
 
-@Slf4j
+@Validated
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/agent")
@@ -29,14 +30,9 @@ public class AgentController {
 
     /**
      * Agent SSE 流式对话接口
-     * 与现有 /chat/stream 并列，互不干扰
-     * POST /agent/chat
-     * Content-Type: application/json
-     * Response: text/event-stream
      */
     @PostMapping(path = "/chat", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public SseEmitter agentChat(@RequestBody AgentChatDTO agentChatDTO) {
-        log.info("[agent] 收到 Agent 对话请求 - userId: {}, model: {}", agentChatDTO.getUserId(), agentChatDTO.getModelName());
+    public SseEmitter agentChat(@Valid @RequestBody AgentChatDTO agentChatDTO) {
         return agentService.chat(agentChatDTO);
     }
 
@@ -45,11 +41,7 @@ public class AgentController {
      * GET /agent/sessions?userId=xxx
      */
     @GetMapping("/sessions")
-    public CustomResponse<List<AgentSessionVO>> listSessions(@RequestParam String userId) {
-        if (StringUtils.isBlank(userId)) {
-            return CustomResponse.error("userId 不能为空");
-        }
-        log.info("[agent] 查询会话列表 - userId: {}", userId);
+    public CustomResponse<List<AgentSessionVO>> listSessions(@RequestParam @NotBlank(message = "userId 不能为空") String userId) {
         return CustomResponse.success(sessionQueryService.listSessions(userId));
     }
 
@@ -58,8 +50,7 @@ public class AgentController {
      * GET /agent/sessions/{sessionId}/messages
      */
     @GetMapping("/sessions/{sessionId}/messages")
-    public CustomResponse<List<AgentSessionMessageVO>> listMessages(@PathVariable String sessionId) {
-        log.info("[agent] 查询会话消息 - sessionId: {}", sessionId);
+    public CustomResponse<List<AgentSessionMessageVO>> listMessages(@PathVariable @NotBlank(message = "sessionId 不能为空") String sessionId) {
         return CustomResponse.success(sessionQueryService.listMessages(sessionId));
     }
 }
