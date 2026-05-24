@@ -77,7 +77,7 @@ public class AgentMemorySummarizer {
         String modelName = agentProperties.getMemory().getLongTerm().getModelName();
         ModelConfig modelConfig = nativeModelManager.getSummaryModelConfig(modelName);
 
-        log.info("[summarizer] 开始提炼, userId: {}, sessionId: {}, 消息数: {}", userId, sessionId, messages.size());
+        log.info("[summarizer] 开始提炼, userId: {}, sessionId: {}, 消息数: {}, 模型: {}", userId, sessionId, messages.size(), modelConfig.getModelName());
         try {
             OpenAiApi openAiApi = OpenAiApi.builder()
                     .apiKey(modelConfig.getApiKey())

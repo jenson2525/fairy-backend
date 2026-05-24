@@ -82,7 +82,7 @@ fairy:
       long-term:
         summarize-threshold: 20   # 触发摘要的消息数阈值
         max-facts-per-user: 50    # MySQL 中每用户保留的最大记忆条数
-        model-name: qwen3.5-flash    # 摘要专用模型
+        model-name: deepseek-v4-flash   # 摘要专用模型
     concurrency:                 # 与 memory 平级，修正原有缩进错误
       max-concurrent: 20         # 最大并发 Agent 请求数
       acquire-timeout-ms: 5000   # 等待获取许可的超时时间（毫秒）

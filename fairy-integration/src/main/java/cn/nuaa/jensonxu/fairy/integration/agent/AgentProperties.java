@@ -70,7 +70,7 @@ public class AgentProperties {
             private int maxFactsPerUser = 50;
 
             /** 摘要专用模型名称 */
-            private String modelName = "qwen3.5-flash";
+            private String modelName = "deepseek-v4-flash";
         }
     }
 
