@@ -9,6 +9,8 @@ import com.alibaba.nacos.api.config.listener.Listener;
 import io.modelcontextprotocol.client.McpAsyncClient;
 import io.modelcontextprotocol.client.McpClient;
 import io.modelcontextprotocol.client.transport.HttpClientSseClientTransport;
+import io.modelcontextprotocol.client.transport.HttpClientStreamableHttpTransport;
+import io.modelcontextprotocol.spec.McpClientTransport;
 import io.modelcontextprotocol.spec.McpSchema;
 
 import jakarta.annotation.PostConstruct;
@@ -28,6 +30,7 @@ import org.yaml.snakeyaml.Yaml;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
+import java.net.URI;
 import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -138,10 +141,30 @@ public class McpClientManager {
      */
     private void createAndRegister(String name, McpConnectionConfig config) {
         try {
-            HttpClientSseClientTransport transport = HttpClientSseClientTransport
-                    .builder(config.getUrl())
-                    .sseEndpoint(config.getSseEndpoint())
-                    .build();
+            // 解析完整 URL，分离 baseUrl 与路径，供两种传输协议统一使用
+            URI uri = URI.create(config.getUrl());
+            String baseUrl = uri.getScheme() + "://" + uri.getAuthority();
+            // String path = StringUtils.defaultIfBlank(uri.getPath(), "/");
+
+            String rawQuery = uri.getRawQuery();
+            String rawPath = StringUtils.defaultIfBlank(uri.getRawPath(), "/");
+            String path = rawQuery != null ? rawPath + "?" + rawQuery : rawPath;  // 有查询参数就在 path 中拼接, 以此兼容 sse 协议
+            Map<String, String> headers = config.getHeaders();
+
+            McpClientTransport transport;
+            if ("streamable-http".equalsIgnoreCase(config.getType())) {
+                var builder = HttpClientStreamableHttpTransport.builder(baseUrl).endpoint(path);
+                if (headers != null && !headers.isEmpty()) {
+                    builder.customizeRequest(req -> headers.forEach(req::header));
+                }
+                transport = builder.build();
+            } else {
+                var builder = HttpClientSseClientTransport.builder(baseUrl).sseEndpoint(path);
+                if (headers != null && !headers.isEmpty()) {
+                    builder.customizeRequest(req -> headers.forEach(req::header));
+                }
+                transport = builder.build();
+            }
 
             McpAsyncClient client = McpClient.async(transport)
                     .clientInfo(new McpSchema.Implementation("fairy-mcp-client", "1.0.0"))
@@ -211,9 +234,16 @@ public class McpClientManager {
                 McpConnectionConfig cfg = new McpConnectionConfig();
                 cfg.setName(name);
                 cfg.setUrl((String) props.get("url"));
-                cfg.setSseEndpoint((String) props.get("sse-endpoint"));
+                cfg.setType((String) props.getOrDefault("type", "sse"));
                 Object enabled = props.get("enabled");
                 cfg.setEnabled(enabled == null || Boolean.TRUE.equals(enabled));
+
+                Object headersObj = props.get("headers");  // 解析自定义请求头
+                if (headersObj instanceof Map<?, ?> rawHeaders) {
+                    Map<String, String> headers = new LinkedHashMap<>();
+                    rawHeaders.forEach((k, v) -> headers.put(String.valueOf(k), String.valueOf(v)));
+                    cfg.setHeaders(headers);
+                }
                 result.put(name, cfg);
             });
         } catch (Exception e) {
