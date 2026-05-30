@@ -1,14 +1,19 @@
 package cn.nuaa.jensonxu.fairy.integration.service.tools.service.impl;
 
+import cn.nuaa.jensonxu.fairy.integration.agent.harness.risk.ToolRisk;
+import cn.nuaa.jensonxu.fairy.integration.agent.harness.risk.ToolRiskLevel;
 import cn.nuaa.jensonxu.fairy.integration.service.tools.service.McpToolService;
 import cn.nuaa.jensonxu.fairy.integration.service.tools.utils.ZoneUtils;
+
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.tool.annotation.ToolParam;
 import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service
+@ToolRisk(ToolRiskLevel.READ_ONLY)
 public class TimeService implements McpToolService {
 
     @Tool(description = "Get the time of a specified city.")

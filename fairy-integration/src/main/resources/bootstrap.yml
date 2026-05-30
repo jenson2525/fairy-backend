@@ -44,3 +44,8 @@ tools:
       MC4CAQAwBQYDK2VwBCIEICtDvzhVOxGXinr/FGq/t4HzMWaIQ2kXPlXMNHlNdr/Q
       -----END PRIVATE KEY-----
     api-host: https://kb4up5k283.re.qweatherapi.com
+harness:
+  limit:
+    tool-call-thread-limit: 20
+    model-call-thread-limit: 10
+    exit-behavior: END

@@ -1,16 +1,22 @@
 package cn.nuaa.jensonxu.fairy.integration.service.tools.service.impl;
 
+import cn.nuaa.jensonxu.fairy.integration.agent.harness.risk.ToolRisk;
+import cn.nuaa.jensonxu.fairy.integration.agent.harness.risk.ToolRiskLevel;
 import cn.nuaa.jensonxu.fairy.integration.service.tools.service.McpToolService;
+
 import lombok.extern.slf4j.Slf4j;
+
 import net.objecthunter.exp4j.Expression;
 import net.objecthunter.exp4j.ExpressionBuilder;
 import net.objecthunter.exp4j.ValidationResult;
+
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.tool.annotation.ToolParam;
 import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service
+@ToolRisk(ToolRiskLevel.READ_ONLY)
 public class CalculatorService implements McpToolService {
 
     @Tool(description = """

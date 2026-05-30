@@ -3,6 +3,8 @@ package cn.nuaa.jensonxu.fairy.integration.service.tools.service.impl;
 import cn.nuaa.jensonxu.fairy.common.file.FileProcessResult;
 import cn.nuaa.jensonxu.fairy.common.file.FileProcessor;
 import cn.nuaa.jensonxu.fairy.common.repository.minio.MinioProperties;
+import cn.nuaa.jensonxu.fairy.integration.agent.harness.risk.ToolRisk;
+import cn.nuaa.jensonxu.fairy.integration.agent.harness.risk.ToolRiskLevel;
 import cn.nuaa.jensonxu.fairy.integration.service.tools.service.McpToolService;
 
 import io.minio.GetObjectArgs;
@@ -24,6 +26,7 @@ import java.io.InputStream;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@ToolRisk(ToolRiskLevel.READ_ONLY)
 public class FileReadService implements McpToolService {
 
     private final MinioClient minioClient;

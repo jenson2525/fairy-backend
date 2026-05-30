@@ -1,14 +1,20 @@
 package cn.nuaa.jensonxu.fairy.integration.service.tools.service.impl;
 
+import cn.nuaa.jensonxu.fairy.integration.agent.harness.risk.ToolRisk;
+import cn.nuaa.jensonxu.fairy.integration.agent.harness.risk.ToolRiskLevel;
 import cn.nuaa.jensonxu.fairy.integration.service.tools.service.McpToolService;
+
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
+
 import lombok.extern.slf4j.Slf4j;
+
 import okhttp3.ConnectionSpec;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
+
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.tool.annotation.ToolParam;
 import org.springframework.stereotype.Service;
@@ -24,6 +30,7 @@ import java.util.concurrent.TimeUnit;
  */
 @Slf4j
 @Service
+@ToolRisk(ToolRiskLevel.READ_ONLY)
 public class ExchangeRateService implements McpToolService {
 
     private static final String BASE_URL = "https://api.frankfurter.app";

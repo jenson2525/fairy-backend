@@ -1,13 +1,19 @@
 package cn.nuaa.jensonxu.fairy.integration.service.tools.service.impl;
 
+import cn.nuaa.jensonxu.fairy.integration.agent.harness.risk.ToolRisk;
+import cn.nuaa.jensonxu.fairy.integration.agent.harness.risk.ToolRiskLevel;
 import cn.nuaa.jensonxu.fairy.integration.service.tools.service.McpToolService;
+
 import lombok.extern.slf4j.Slf4j;
+
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
+
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.tool.annotation.ToolParam;
 import org.springframework.stereotype.Service;
@@ -24,6 +30,7 @@ import java.util.concurrent.TimeUnit;
  */
 @Slf4j
 @Service
+@ToolRisk(ToolRiskLevel.READ_ONLY)
 public class WebFetchService implements McpToolService {
 
     private static final int MAX_CONTENT_LENGTH = 3000;
