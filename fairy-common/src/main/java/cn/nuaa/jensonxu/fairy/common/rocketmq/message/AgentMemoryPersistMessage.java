@@ -31,4 +31,7 @@ public class AgentMemoryPersistMessage implements Serializable {
 
     /** 首次投递时间戳，用于日志追踪 */
     private long originTimestamp;
+
+    /** 消息来源：normal / qq 等 */
+    private String source;
 }

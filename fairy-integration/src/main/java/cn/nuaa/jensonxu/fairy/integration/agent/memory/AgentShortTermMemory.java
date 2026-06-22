@@ -40,13 +40,13 @@ public class AgentShortTermMemory {
     private final AgentSessionMessageRepository sessionMessageRepository;
     private final AgentProperties agentProperties;
 
-    public void saveMessages(String sessionId, String userId, List<Message> messages) {
+    public void saveMessages(String sessionId, String userId, String source, List<Message> messages) {
         if (messages == null || messages.isEmpty()) {
             return;
         }
 
         // 先写 MySQL
-        List<AgentSessionMessageDO> doList = buildDOList(sessionId, userId, messages);
+        List<AgentSessionMessageDO> doList = buildDOList(sessionId, userId, source, messages);
         sessionMessageRepository.batchInsert(doList);
 
         // 再写 Redis
@@ -125,7 +125,7 @@ public class AgentShortTermMemory {
         return messages;
     }
 
-    private List<AgentSessionMessageDO> buildDOList(String sessionId, String userId, List<Message> messages) {
+    private List<AgentSessionMessageDO> buildDOList(String sessionId, String userId, String source, List<Message> messages) {
         int baseSeq = sessionMessageRepository.countBySessionId(sessionId);
         List<AgentSessionMessageDO> doList = new ArrayList<>();
         for (int i = 0; i < messages.size(); i++) {
@@ -133,6 +133,7 @@ public class AgentShortTermMemory {
             doList.add(AgentSessionMessageDO.builder()
                     .sessionId(sessionId)
                     .userId(userId)
+                    .source(source)
                     .role(resolveRole(msg))
                     .content(serialize(msg))
                     .seq(baseSeq + i + 1)

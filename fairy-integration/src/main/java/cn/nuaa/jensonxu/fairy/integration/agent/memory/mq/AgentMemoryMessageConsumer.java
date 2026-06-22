@@ -44,6 +44,7 @@ public class AgentMemoryMessageConsumer extends AbstractRocketMQConsumer<AgentMe
         AgentSessionMessageDO humanDO = buildDO(
                 message.getSessionId(),
                 message.getUserId(),
+                message.getSource(),
                 "user",
                 serializeContent("user", message.getHumanContent()),
                 baseSeq + 1
@@ -51,6 +52,7 @@ public class AgentMemoryMessageConsumer extends AbstractRocketMQConsumer<AgentMe
         AgentSessionMessageDO assistantDO = buildDO(
                 message.getSessionId(),
                 message.getUserId(),
+                message.getSource(),
                 "assistant",
                 serializeContent("assistant", message.getAssistantContent()),
                 baseSeq + 2
@@ -71,11 +73,11 @@ public class AgentMemoryMessageConsumer extends AbstractRocketMQConsumer<AgentMe
         log.error("[memory] 消费异常，触发 RocketMQ 重试, sessionId: {}", message.getSessionId(), throwable);  // 抛出异常，触发 RocketMQ 重试机制
     }
 
-    private AgentSessionMessageDO buildDO(String sessionId, String userId,
-                                          String role, String content, int seq) {
+    private AgentSessionMessageDO buildDO(String sessionId, String userId, String source, String role, String content, int seq) {
         return AgentSessionMessageDO.builder()
                 .sessionId(sessionId)
                 .userId(userId)
+                .source(source)
                 .role(role)
                 .content(content)
                 .seq(seq)

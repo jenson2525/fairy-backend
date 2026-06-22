@@ -16,6 +16,7 @@ import cn.nuaa.jensonxu.fairy.integration.agent.memory.AgentLongTermMemory;
 import cn.nuaa.jensonxu.fairy.integration.service.skill.NativeSkillRegistry;
 
 import com.alibaba.cloud.ai.graph.RunnableConfig;
+import com.alibaba.cloud.ai.graph.StateGraph;
 import com.alibaba.cloud.ai.graph.agent.ReactAgent;
 import com.alibaba.cloud.ai.graph.agent.hook.Hook;
 import com.alibaba.cloud.ai.graph.agent.hook.modelcalllimit.ModelCallLimitHook;
@@ -118,6 +119,8 @@ public class AgentClientBuilder {
                 Checkpoint checkpoint = Checkpoint.builder()
                         .id(UUID.randomUUID().toString())
                         .state(Map.of("messages", messages))
+                        .nodeId(StateGraph.START)          // 回填的是执行前的起始状态
+                        .nextNodeId(StateGraph.START)      // 框架要求非空；正常对话走 start 分支不据此路由
                         .build();
                 memorySaver.put(config, checkpoint);
                 log.info("[agent] MemorySaver 回填历史消息 {} 条, sessionId: {}", messages.size(), sessionId);

@@ -29,6 +29,14 @@ public class RedisUtil {
     }
 
     /**
+     * 仅当 key 不存在时设置并指定过期时间（原子 SETNX）
+     * @return true=设置成功（key 此前不存在）；false=key 已存在
+     */
+    public boolean setIfAbsent(String key, Object value, long timeout, TimeUnit unit) {
+        return Boolean.TRUE.equals(redisTemplate.opsForValue().setIfAbsent(key, value, timeout, unit));
+    }
+
+    /**
      * 获取值
      */
     public Object get(String key) {

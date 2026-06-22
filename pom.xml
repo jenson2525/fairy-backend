@@ -22,6 +22,7 @@
         <module>fairy-service</module>
         <module>fairy-common</module>
         <module>fairy-integration</module>
+        <module>fairy-im</module>
     </modules>
 
     <properties>

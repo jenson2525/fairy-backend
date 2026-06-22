@@ -88,6 +88,14 @@ fairy:
       acquire-timeout-ms: 5000   # 等待获取许可的超时时间（毫秒）
       permit-ttl-ms: 60000       # 单个许可持有 TTL（毫秒），兜底防泄漏
 
+  im:
+    qq:
+      napcat:
+        api-base-url: http://127.0.0.1:3000
+        access-token: 45loQlNSLBLvo3.7
+        max-message-length: 2000
+        send-interval-ms: 300
+
 logging:
   level:
     cn.nuaa.jensonxu.fairy: debug

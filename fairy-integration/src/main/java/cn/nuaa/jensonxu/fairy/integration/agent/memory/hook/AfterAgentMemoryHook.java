@@ -1,5 +1,6 @@
 package cn.nuaa.jensonxu.fairy.integration.agent.memory.hook;
 
+import cn.nuaa.jensonxu.fairy.common.data.llm.agent.MessageSource;
 import cn.nuaa.jensonxu.fairy.common.rocketmq.message.AgentMemoryExtractMessage;
 import cn.nuaa.jensonxu.fairy.common.rocketmq.message.AgentMemoryPersistMessage;
 import cn.nuaa.jensonxu.fairy.integration.agent.memory.AgentShortTermMemory;
@@ -36,6 +37,7 @@ public class AfterAgentMemoryHook extends AgentHook {
 
     private static final String USER_ID_KEY = "user_id";
     private static final String MESSAGES_KEY = "messages";
+    private static final String SOURCE_KEY = "source";
 
     private final AgentShortTermMemory shortTermMemory;
     private final AgentMemoryMessageProducer persistProducer;
@@ -51,6 +53,7 @@ public class AfterAgentMemoryHook extends AgentHook {
     public CompletableFuture<Map<String, Object>> afterAgent(OverAllState state, RunnableConfig config) {
         String sessionId = config.threadId().orElse(null);
         String userId = config.metadata(USER_ID_KEY).map(Object::toString).orElse(null);
+        String source = config.metadata(SOURCE_KEY).map(Object::toString).orElse(MessageSource.NORMAL);
 
         if (sessionId == null || userId == null) {
             log.warn("[after-agent-memory] 缺少 sessionId 或 userId，跳过记忆写入");
@@ -78,7 +81,7 @@ public class AfterAgentMemoryHook extends AgentHook {
         }
 
         log.info("[after-agent-memory] 本轮消息提取完成, sessionId: {}", sessionId);
-        boolean mysqlSuccess = persistShortTermMemory(sessionId, userId, lastHuman, lastAssistant);
+        boolean mysqlSuccess = persistShortTermMemory(sessionId, userId, source, lastHuman, lastAssistant);
 
         // 仅在 MySQL 写入成功后投递提炼消息，保证消费者读取时数据已就绪
         if (mysqlSuccess) {
@@ -103,9 +106,9 @@ public class AfterAgentMemoryHook extends AgentHook {
      *
      * @return true=MySQL 写入成功；false=写入失败已降级
      */
-    private boolean persistShortTermMemory(String sessionId, String userId, UserMessage human, AssistantMessage assistant) {
+    private boolean persistShortTermMemory(String sessionId, String userId, String source, UserMessage human, AssistantMessage assistant) {
         try {
-            shortTermMemory.saveMessages(sessionId, userId, List.of(human, assistant));
+            shortTermMemory.saveMessages(sessionId, userId, source, List.of(human, assistant));
             log.info("[after-agent-memory] 短期记忆写入成功, sessionId: {}", sessionId);
             return true;
         } catch (Exception e) {
@@ -113,6 +116,7 @@ public class AfterAgentMemoryHook extends AgentHook {
             persistProducer.sendPersistMessage(AgentMemoryPersistMessage.builder()
                     .sessionId(sessionId)
                     .userId(userId)
+                    .source(source)
                     .humanContent(human.getText())
                     .assistantContent(assistant.getText())
                     .originTimestamp(System.currentTimeMillis())

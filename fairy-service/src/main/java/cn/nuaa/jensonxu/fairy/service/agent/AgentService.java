@@ -10,6 +10,8 @@ import cn.nuaa.jensonxu.fairy.integration.agent.AgentSessionTitleGenerator;
 import cn.nuaa.jensonxu.fairy.integration.agent.handler.AgentConcurrencyLimiter;
 import cn.nuaa.jensonxu.fairy.integration.agent.handler.AgentHandler;
 
+import cn.nuaa.jensonxu.fairy.integration.agent.handler.AgentSegmentHandler;
+import cn.nuaa.jensonxu.fairy.integration.agent.handler.AgentSegmentListener;
 import cn.nuaa.jensonxu.fairy.integration.agent.memory.AgentLoadedContext;
 import cn.nuaa.jensonxu.fairy.integration.agent.memory.AgentMemoryManager;
 import com.alibaba.cloud.ai.graph.agent.ReactAgent;
@@ -55,6 +57,23 @@ public class AgentService {
         AgentHandler agentHandler = new AgentHandler(reactAgent, sseEmitter, agentChatDTO, agentProperties, concurrencyLimiter);  // ④ 实例化 AgentHandler，异步执行 Agent 推理循环
         agentHandler.runV2();
         return sseEmitter;
+    }
+
+    /**
+     * Agent 分段对话入口（非流式场景，如 IM 平台）
+     * 复用记忆加载与 ReactAgent 构建，按 ReAct 段边界通过 listener 逐段输出，
+     * 本方法阻塞至 Agent 执行结束，调用方负责异步调度
+     * @param agentChatDTO 请求参数（含用户消息、模型名称、sessionId 等）
+     * @param listener     段输出监听器，决定每段如何落地
+     */
+    public void chatSegmented(AgentChatDTO agentChatDTO, AgentSegmentListener listener) {
+        String agentSessionId = agentChatDTO.getSessionId();
+        log.info("[agent] 开始分段对话 - userId: {}, agentSessionId: {}, model: {}", agentChatDTO.getUserId(), agentSessionId, agentChatDTO.getModelName());
+        agentChatDTO.setMessage(buildMessage(agentChatDTO));  // 预留：封装文件附件信息
+        AgentLoadedContext context = agentMemoryManager.loadContext(agentSessionId, agentChatDTO.getUserId());  // 加载记忆上下文
+        ReactAgent reactAgent = agentClientBuilder.build(agentChatDTO.getModelName(), agentSessionId, agentChatDTO.getUserId(), context);  // 构建 ReactAgent
+        AgentSegmentHandler handler = new AgentSegmentHandler(reactAgent, agentChatDTO, listener);
+        handler.run();  // 阻塞执行
     }
 
     /**

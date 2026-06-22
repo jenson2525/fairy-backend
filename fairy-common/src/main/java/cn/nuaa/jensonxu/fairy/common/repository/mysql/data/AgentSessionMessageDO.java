@@ -41,6 +41,10 @@ public class AgentSessionMessageDO {
     @TableField("content")
     private String content;
 
+    /** 消息来源：normal（web/客户端）/ qq 等 IM 平台 */
+    @TableField("source")
+    private String source;
+
     /** 消息在会话内的顺序号，从 1 起递增 */
     @TableField("seq")
     private Integer seq;

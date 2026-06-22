@@ -1,6 +1,7 @@
 package cn.nuaa.jensonxu.fairy.common.data.llm.agent.request;
 
 import cn.nuaa.jensonxu.fairy.common.data.llm.ChatFileDTO;
+import cn.nuaa.jensonxu.fairy.common.data.llm.agent.MessageSource;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -38,6 +39,13 @@ public class AgentChatDTO {
      * 为空时 AgentService 将使用 AgentProperties.defaultModel 兜底
      */
     private String modelName;
+
+    /**
+     * 消息来源
+     * web/客户端不传即默认 normal；IM 平台显式设置（如 qq）
+     * 透传至 RunnableConfig metadata，最终落库到 agent_session_message.source
+     */
+    private String source = MessageSource.NORMAL;
 
     /**
      * 最大 ReAct 循环迭代次数

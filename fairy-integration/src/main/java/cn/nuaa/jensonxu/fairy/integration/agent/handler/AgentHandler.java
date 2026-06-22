@@ -94,6 +94,7 @@ public class AgentHandler {
             RunnableConfig runnableConfig = RunnableConfig.builder()
                     .threadId(agentChatDTO.getSessionId())
                     .addMetadata("user_id", agentChatDTO.getUserId())
+                    .addMetadata("source", agentChatDTO.getSource())
                     .build();
 
             reactAgent.stream(agentChatDTO.getMessage(), runnableConfig)
